@@ -471,14 +471,39 @@ LoadSamples()
 # MAIN LOOP
 #########################################
 
-midi_in = [rtmidi.MidiIn()]
-previous = []
+
+#midi_in = [rtmidi.MidiIn()]
+#previous = []
+#while True:
+#    for port in midi_in[0].ports:
+#        if port not in previous and 'Midi Through' not in port:
+#            midi_in.append(rtmidi.MidiIn())
+#            midi_in[-1].callback = MidiCallback
+#            midi_in[-1].open_port(port)
+#            print 'Opened MIDI: ' + port
+#    previous = midi_in[0].ports
+#    time.sleep(2)
+
+stopit = False
+midi_in = rtmidi2.MidiInMulti()
+curr_ports = []
+prev_ports = []
+first_loop = True
 while True:
-    for port in midi_in[0].ports:
-        if port not in previous and 'Midi Through' not in port:
-            midi_in.append(rtmidi.MidiIn())
-            midi_in[-1].callback = MidiCallback
-            midi_in[-1].open_port(port)
-            print 'Opened MIDI: ' + port
-    previous = midi_in[0].ports
-    time.sleep(2)
+    if stopit:
+        break
+    curr_ports = rtmidi2.get_in_ports()
+    if (len(prev_ports) != len(curr_ports)):
+        midi_in.close_ports()
+        prev_ports = []
+        for port in curr_ports:
+            if port not in prev_ports and 'Midi Through' not in port and (len(prev_ports) != len(curr_ports)):
+                midi_in.open_ports(port)
+                midi_in.callback = MidiCallback
+                if first_loop:
+                    print 'Opened MIDI port: ' + port
+                else:
+                    print 'Reopening MIDI port: ' + port
+                    prev_ports = curr_ports
+                    first_loop = False
+                    time.sleep(2)
