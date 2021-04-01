@@ -38,6 +38,7 @@ from chunk import Chunk
 import struct
 import rtmidi_python as rtmidi
 import samplerbox_audio
+import rtmidi2
 
 
 #########################################
